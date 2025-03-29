@@ -16,7 +16,7 @@ import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
 
 using StringTools;
-#if desktop
+#if sys
 import sys.FileSystem;
 import sys.io.File;
 #else
