@@ -7,6 +7,15 @@ import flixel.math.FlxMath;
 import flixel.util.FlxSave;
 
 class ClientPrefs {
+	// Mobile and Mobile Controls Releated
+	public static var extraButtons:String = "NONE"; // mobile extra button option
+	public static var hitboxPos:Bool = true; // hitbox extra button position option
+	public static var controlsAlpha:Float = FlxG.onMobile ? 0.6 : 0;
+	public static var screensaver:Bool = false;
+	#if android
+	public static var storageType:String = "EXTERNAL_DATA";
+	#end
+	public static var hitboxType:String = "Gradient";
 	public static var downScroll:Bool = false;
 	public static var middleScroll:Bool = false;
 	public static var opponentStrums:Bool = true;
@@ -115,6 +124,14 @@ class ClientPrefs {
 	}
 
 	public static function saveSettings() {
+		FlxG.save.data.extraButtons = extraButtons;
+		FlxG.save.data.hitboxPos = hitboxPos;
+		FlxG.save.data.controlsAlpha = controlsAlpha;
+		FlxG.save.data.screensaver = screensaver;
+		#if android
+		FlxG.save.data.storageType = storageType;
+		#end
+		FlxG.save.data.hitboxType = hitboxType;
 		FlxG.save.data.downScroll = downScroll;
 		FlxG.save.data.middleScroll = middleScroll;
 		FlxG.save.data.opponentStrums = opponentStrums;
@@ -177,6 +194,26 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
+		if(FlxG.save.data.extraButtons != null) {
+			extraButtons = FlxG.save.data.extraButtons;
+		}
+		if(FlxG.save.data.hitboxPos != null) {
+			hitboxPos = FlxG.save.data.hitboxPos;
+		}
+		if(FlxG.save.data.controlsAlpha != null) {
+			controlsAlpha = FlxG.save.data.controlsAlpha;
+		}
+		if(FlxG.save.data.screensaver != null) {
+			screensaver = FlxG.save.data.screensaver;
+		}
+		#if android
+		if(FlxG.save.data.storageType != null) {
+			storageType = FlxG.save.data.storageType;
+		}
+		#end
+		if(FlxG.save.data.hitboxType != null) {
+			hitboxType = FlxG.save.data.hitboxType;
+		}
 		if(FlxG.save.data.downScroll != null) {
 			downScroll = FlxG.save.data.downScroll;
 		}
