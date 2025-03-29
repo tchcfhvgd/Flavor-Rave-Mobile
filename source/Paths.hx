@@ -1,7 +1,7 @@
 package;
 
 import animateatlas.AtlasFrameMaker;
-import flash.media.Sound;
+import openfl.media.Sound;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
@@ -63,6 +63,7 @@ class Paths
 		'assets/images/alphabet.png',
 		'assets/music/freakyMenu.$SOUND_EXT',
 		'assets/shared/music/110th-street.$SOUND_EXT',
+		'assets/mobile/touchpad/bg.png'
 	];
 
 	// haya I love you for the base cache dump I took to the max
@@ -81,6 +82,11 @@ class Paths
 
 		// run the garbage collector for good measure lmfao
 		System.gc();
+		#if cpp
+		cpp.NativeGc.run(true);
+		#elseif hl
+		hl.Gc.major();
+		#end
 	}
 
 	// define the locally tracked assets
@@ -127,9 +133,12 @@ class Paths
 
 	public static function getPath(file:String, type:AssetType, ?library:Null<String> = null)
 	{
+		if (library == "mobile")
+			return getPreloadPath('mobile/$file');
+		
 		if (library != null)
 			return getLibraryPath(file, library);
-
+		
 		if (currentLevel != null)
 		{
 			var levelPath:String = '';
@@ -426,8 +435,8 @@ class Paths
 		if(!currentTrackedSounds.exists(gottenPath))
 		#if MODS_ALLOWED
 		{
-			if(async) Sound.loadFromFile('./$gottenPath').onComplete(sound -> {currentTrackedSounds.set(gottenPath, sound);});
-			else currentTrackedSounds.set(gottenPath, Sound.fromFile('./$gottenPath'));
+			if(async) Sound.loadFromFile('$gottenPath').onComplete(sound -> {currentTrackedSounds.set(gottenPath, sound);});
+			else currentTrackedSounds.set(gottenPath, Sound.fromFile('$gottenPath'));
 		}
 		#else
 		{
@@ -457,7 +466,7 @@ class Paths
 
 	#if MODS_ALLOWED
 	inline static public function mods(key:String = '') {
-		return 'mods/' + key;
+		return #if mobile Sys.getCwd() + #end 'mods/' + key;
 	}
 
 	inline static public function modsFont(key:String) {
@@ -523,7 +532,7 @@ class Paths
 				return fileToCheck;
 		}
 		
-		return 'mods/' + key;
+		return #if mobile Sys.getCwd() + #end 'mods/' + key;
 	}
 
 	public static var globalMods:Array<String> = [];
@@ -569,4 +578,25 @@ class Paths
 		return list;
 	}
 	#end
+
+	public static function readDirectory(directory:String):Array<String>
+	{
+		#if MODS_ALLOWED
+		return FileSystem.readDirectory(directory);
+		#else
+		var dirs:Array<String> = [];
+		for (dir in Assets.list().filter(folder -> folder.startsWith(directory)))
+		{
+			@:privateAccess
+			for (library in lime.utils.Assets.libraries.keys())
+			{
+				if (library != 'default' && Assets.exists('$library:$dir') && (!dirs.contains('$library:$dir') || !dirs.contains(dir)))
+					dirs.push('$library:$dir');
+				else if (Assets.exists(dir) && !dirs.contains(dir))
+					dirs.push(dir);
+			}
+		}
+		return dirs.map(dir -> dir.substr(dir.lastIndexOf("/") + 1));
+		#end
+	}
 }
