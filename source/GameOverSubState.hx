@@ -136,6 +136,9 @@ class GameOverSubState extends MusicBeatSubstate
 			FlxTween.tween(nobutt, {alpha: 1}, 0.3, {ease: FlxEase.sineOut});
 		});
 
+		addTouchPad("LEFT_RIGHT", "A_B");
+		addTouchPadCamera();
+
 	}
 
 	override function update(elapsed:Float)
