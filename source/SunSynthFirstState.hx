@@ -201,6 +201,8 @@ class SunSynthFirstState extends MusicBeatState
 		});
 
 		super.create();
+
+		addTouchPad("NONE", "A");
 	}
 
 	override function update(elapsed:Float)
