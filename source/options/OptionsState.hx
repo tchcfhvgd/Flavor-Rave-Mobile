@@ -51,7 +51,7 @@ class OptionsState extends MusicBeatState
 
 		allowInput = false;
 
-		if (label != "Adjust Delay and Combo" | "Mods and DLC"){
+		if (label != "Adjust Delay and Combo"){
 			persistentUpdate = false;
 			removeTouchPad();
 		}
