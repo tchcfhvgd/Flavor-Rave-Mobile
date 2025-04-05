@@ -137,7 +137,11 @@ class DialogueBoxDreamcast extends FlxSpriteGroup
 
 		if (allowInput)
 		{
-			if (PlayerSettings.player1.controls.ACCEPT)
+			var justTouched:Bool = false;
+			for (touch in FlxG.touches.list)
+				if (touch.justPressed)
+					justTouched = true;
+			if (PlayerSettings.player1.controls.ACCEPT || justTouched)
 			{
 				if (!dialogueEnded)
 				{
@@ -154,7 +158,7 @@ class DialogueBoxDreamcast extends FlxSpriteGroup
 						closeDialogue();
 				}
 			}
-			else if (PlayerSettings.player1.controls.BACK)
+			else if (PlayerSettings.player1.controls.BACK || #if android FlxG.android.justReleased.BACK #end)
 			{
 				closeDialogue();
 			}
