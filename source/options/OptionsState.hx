@@ -30,7 +30,7 @@ using StringTools;
 
 class OptionsState extends MusicBeatState
 {
-	var options:Array<String> = ['Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Mods and DLC'];
+	var options:Array<String> = ['Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Mods and DLC', 'Mobile Options'];
 	private var grpOptions:FlxTypedGroup<OptionsItem>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
@@ -51,6 +51,11 @@ class OptionsState extends MusicBeatState
 
 		allowInput = false;
 
+		if (label != "Adjust Delay and Combo" && "Mods and DLC"){
+			persistentUpdate = false;
+			removeTouchPad();
+		}
+		
 		switch(label) {
 			case 'Controls':
 				openSubState(new ControlsSubState());
@@ -64,6 +69,8 @@ class OptionsState extends MusicBeatState
 				MusicBeatState.switchState(new NoteOffsetState());
 			case 'Mods and DLC':
 				MusicBeatState.switchState(new ModsMenuState());
+			case 'Mobile Options':
+				openSubState(new mobile.options.MobileOptionsSubState());
 		}
 	}
 
@@ -115,6 +122,8 @@ class OptionsState extends MusicBeatState
 		ClientPrefs.saveSettings();
 
 		super.create();
+
+		addTouchPad("UP_DOWN", "A_B_C");	
 	}
 
 	override function closeSubState() {
@@ -124,6 +133,9 @@ class OptionsState extends MusicBeatState
 		FlxTween.cancelTweensOf(bgthingie);
 		FlxTween.tween(bgthingie, {x: 0}, 0.2, {ease: FlxEase.sineOut});
 		allowInput = true;
+		persistentUpdate = true;
+		removeTouchPad();
+		addTouchPad("UP_DOWN", "A_B_C");
 	}
 	
 	override function update(elapsed:Float) {
@@ -157,6 +169,12 @@ class OptionsState extends MusicBeatState
 			if (controls.ACCEPT) {
 				openSelectedSubstate(options[curSelected]);
 			}
+
+			if (touchPad != null && touchPad.buttonC.justPressed) {
+			allowInput = false;
+			touchPad.active = touchPad.visible = persistentUpdate = false;
+			openSubState(new mobile.MobileControlSelectSubState());
+				}
 		}
 
 		grpOptions.forEach(function(spr:OptionsItem) 
