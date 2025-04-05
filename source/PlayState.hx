@@ -82,6 +82,10 @@ import sys.io.File;
 import hxvlc.flixel.FlxVideo;
 #end
 
+import mobile.TouchButton;
+import mobile.TouchPad;
+import mobile.input.MobileInputID;
+
 class PlayState extends MusicBeatState
 {
 	public static var STRUM_X = 42;
@@ -836,6 +840,18 @@ class PlayState extends MusicBeatState
 
 		// startCountdown();
 
+		#if !android
+		addTouchPad("NONE", "P");
+		addTouchPadCamera();
+		touchPad.visible = true;
+		#end
+		addMobileControls();
+		if(!ClientPrefs.controllerMode)
+		{
+		mobileControls.onButtonDown.add(onButtonPress);
+		mobileControls.onButtonUp.add(onButtonRelease);
+		}
+		
 		generateSong(SONG.song);
 
 		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
@@ -1654,7 +1670,7 @@ class PlayState extends MusicBeatState
 				//if(ClientPrefs.middleScroll) opponentStrums.members[i].visible = false;
 			}
 			
-			startedCountdown = true;
+			startedCountdown = mobileControls.instance.visible = true;
 			Conductor.songPosition = -(countdownTime * 1000) * countdownLoop;
 			setOnLuas('startedCountdown', true);
 			callOnLuas('onCountdownStarted', []);
@@ -2829,7 +2845,7 @@ class PlayState extends MusicBeatState
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
 		}
 
-		if (controls.PAUSE && startedCountdown && canPause)
+		if (controls.PAUSE || #if android FlxG.android.justReleased.BACK #else touchPad.buttonP.justPressed #end && startedCountdown && canPause)
 		{
 			var ret:Dynamic = callOnLuas('onPause', [], false);
 			if(ret != FunkinLua.Function_Stop) {
@@ -4127,6 +4143,8 @@ class PlayState extends MusicBeatState
 		updateTime = false;
 
 		seenCutscene = false;
+		
+		mobileControls.instance.visible = #if !android touchPad.visible = #end false;
 
 		var ret:Dynamic = callOnLuas('onEndSong', [], false);
 
@@ -4656,6 +4674,111 @@ class PlayState extends MusicBeatState
 		return -1;
 	}
 
+	private function onButtonPress(button:TouchButton):Void
+	{
+		if (button.IDs.filter(id -> id.toString().startsWith("EXTRA")).length > 0)
+			return;
+
+		var buttonCode:Int = (button.IDs[0].toString().startsWith('NOTE')) ? button.IDs[0] : button.IDs[1];
+
+		if (!cpuControlled && startedCountdown && !paused && buttonCode > -1 && button.justPressed)
+		{
+			if(!boyfriend.stunned && generatedMusic && !endingSong)
+			{
+				var ana:Ana = new Ana(Conductor.songPosition, null, false, "miss", buttonCode);
+
+				var canMiss:Bool = !ClientPrefs.ghostTapping;
+
+				// heavily based on my own code LOL if it aint broke dont fix it
+				var sortedNotesList:Array<Note> = [];
+				for (daNote in notes)
+				{
+					if (strumsBlocked[daNote.noteData] != true && daNote.canBeHit && daNote.recalculatePlayerNote(opponentPlay) && !daNote.tooLate && !daNote.wasGoodHit && !daNote.isSustainNote && !daNote.blockHit)
+					{
+						if(daNote.noteData == buttonCode) sortedNotesList.push(daNote);
+						canMiss = true;
+					}
+				}
+				sortedNotesList.sort(sortHitNotes);
+
+				if (sortedNotesList.length > 0) {
+					var epicNote:Note = sortedNotesList[0];
+					if (sortedNotesList.length > 1) {
+						for (bad in 1...sortedNotesList.length)
+						{
+							var doubleNote:Note = sortedNotesList[bad];
+							// no point in jack detection if it isn't a jack
+							if (doubleNote.noteData != epicNote.noteData)
+								break;
+	
+							if (Math.abs(doubleNote.strumTime - epicNote.strumTime) < 1) {
+								notes.remove(doubleNote, true);
+								doubleNote.destroy();
+								break;
+							} else if (doubleNote.strumTime < epicNote.strumTime)
+							{
+								// replace the note if its ahead of time
+								epicNote = doubleNote; 
+								break;
+							}
+						}
+					}
+
+					// eee jack detection before was not super good
+					var noteDiffSigned:Float = (epicNote.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset);
+					goodNoteHit(epicNote);
+					ana.hit = true;
+					ana.hitJudge = Conductor.judgeNote(epicNote, noteDiffSigned).name;
+					ana.nearestNote = [epicNote.strumTime, epicNote.noteData, epicNote.sustainLength];
+				}
+				else{
+					callOnLuas('onGhostTap', [buttonCode]);
+					if (canMiss) {
+						noteMissPress(buttonCode);
+						ana.hit = false;
+						ana.hitJudge = "shit";
+						ana.nearestNote = [];
+					}
+				}
+
+				// I dunno what you need this for but here you go
+				//									- Shubs
+
+				// Shubs, this is for the "Just the Two of Us" achievement lol
+				//									- Shadow Mario
+				keysPressed[buttonCode] = true;	
+			}
+
+			var spr:StrumNote = (opponentPlay ? opponentStrums.members[buttonCode] : playerStrums.members[buttonCode]);
+			if(strumsBlocked[buttonCode] != true && spr != null && spr.animation.curAnim.name != 'confirm')
+			{
+				spr.playAnim('pressed');
+				spr.resetAnim = 0;
+			}
+			callOnLuas('onKeyPress', [buttonCode]);
+		}
+	}
+
+	private function onButtonRelease(button:TouchButton):Void
+	{
+		if (button.IDs.filter(id -> id.toString().startsWith("EXTRA")).length > 0)
+			return;
+
+		var buttonCode:Int = (button.IDs[0].toString().startsWith('NOTE')) ? button.IDs[0] : button.IDs[1];
+
+		if (!cpuControlled && startedCountdown && !paused && buttonCode > -1)
+		{
+			var spr:StrumNote = (opponentPlay ? opponentStrums.members[buttonCode] : playerStrums.members[buttonCode]);
+			if(spr != null)
+			{
+				spr.playAnim('static');
+				spr.resetAnim = 0;
+			}
+			callOnLuas('onKeyRelease', [buttonCode]);
+			callOnLuas('onButtonRelease', [buttonCode]);
+		}
+	}
+	
 	// Hold notes
 	private function keyShit():Void
 	{
