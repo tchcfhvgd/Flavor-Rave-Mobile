@@ -217,6 +217,9 @@ class PauseSubState extends MusicBeatSubstate
 			hideborderthignieawmdsa.antialiasing = false;
 			insert(999999, hideborderthignieawmdsa);
 		}
+
+		addTouchPad(PlayState.chartingMode ? "LEFT_FULL" : "UP_DOWN", "A");
+		addTouchPadCamera();
 	}
 
 	var holdTime:Float = 0;
