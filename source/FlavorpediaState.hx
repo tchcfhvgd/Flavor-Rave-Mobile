@@ -190,6 +190,8 @@ class FlavorpediaState extends MusicBeatState
 		});
 
 		super.create();
+
+		addTouchPad("LEFT_RIGHT", "A_B_C");
 	}
 
 
@@ -199,12 +201,12 @@ class FlavorpediaState extends MusicBeatState
 
 		if (allowInput)
 		{
-			if (FlxG.keys.justPressed.SPACE)
+			if (FlxG.keys.justPressed.SPACE || touchPad.buttonC.justPressed)
 			{
 				playVoice();
 			}
 
-			if (FlxG.keys.justPressed.ENTER)
+			if (FlxG.keys.justPressed.ENTER || touchPad.buttonA.justPressed)
 			{
 				openLink();
 			}
