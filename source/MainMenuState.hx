@@ -226,6 +226,8 @@ class MainMenuState extends MusicBeatState
 		});
 
 		super.create();
+
+		addTouchPad("LEFT_FULL", "A_B");
 	}
 
 	override function update(elapsed:Float)
