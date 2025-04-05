@@ -211,6 +211,8 @@ class FlavorpediaSideState extends MusicBeatState
 			changeItem();
 		});
 
+		addTouchPad("LEFT_FULL", "A_B");
+		
 		super.create();
 	}
 
