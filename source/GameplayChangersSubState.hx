@@ -66,6 +66,9 @@ class GameplayChangersSubState extends MusicBeatSubstate
 		});
 
 		changeSelection();
+
+		addTouchPad("LEFT_FULL", "B_C");
+		addTouchPadCamera();
 	}
 
 	override function update(elapsed:Float):Void
@@ -86,9 +89,9 @@ class GameplayChangersSubState extends MusicBeatSubstate
 				changeSelection(1);
 
 			// LEFT, RIGHT
-			if (FlxG.keys.pressed.SHIFT ? controls.UI_LEFT : controls.UI_LEFT_P)
+			if (touchPad.buttonC.pressed ? controls.UI_LEFT : controls.UI_LEFT_P)
 				changeModifier(-1);
-			if (FlxG.keys.pressed.SHIFT ? controls.UI_RIGHT : controls.UI_RIGHT_P)
+			if (touchPad.buttonC.pressed  ? controls.UI_RIGHT : controls.UI_RIGHT_P)
 				changeModifier(1);
 
 			if (FlxG.keys.justPressed.R)
