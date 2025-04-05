@@ -224,6 +224,8 @@ class SunSynthState extends MusicBeatState
 		});
 
 		super.create();
+
+		addTouchPad("UP_DOWN", "A_B");
 	}
 
 
