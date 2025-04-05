@@ -213,6 +213,8 @@ class ModsMenuState extends MusicBeatState
 		FlxG.mouse.visible = true;
 
 		super.create();
+
+		addTouchPad("UP_DOWN", "B");
 	}
 
 	/*function getIntArray(max:Int):Array<Int>{
