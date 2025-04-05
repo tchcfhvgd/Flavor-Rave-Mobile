@@ -80,7 +80,7 @@ class CopyState extends MusicBeatState
 
 		add(new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, 0xffcaff4d));
 
-		loadingImage = new FlxSprite(0, 0, Paths.image('funkay', 'shared'));
+		loadingImage = new FlxSprite(0, 0, Paths.image('funkay'));
 		loadingImage.setGraphicSize(0, FlxG.height);
 		loadingImage.updateHitbox();
 		loadingImage.screenCenter();
