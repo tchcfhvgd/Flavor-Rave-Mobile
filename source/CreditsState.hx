@@ -135,6 +135,8 @@ class CreditsState extends MusicBeatState
 		modRoleText.text = rolelist[curPage];
 		add(modRoleText);
 
+		addTouchPad("LEFT_FULL", "A_B");
+		
 		super.create();
 	}
 
