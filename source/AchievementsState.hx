@@ -119,6 +119,8 @@ class AchievementsState extends MusicBeatState
 		});
 
 		super.create();
+
+		addTouchPad("UP_DOWN", "B");
 	}
 
 	override function update(elapsed:Float)
