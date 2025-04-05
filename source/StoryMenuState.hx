@@ -193,6 +193,8 @@ class StoryMenuState extends MusicBeatState
 
 		changeWeek();
 
+		addTouchPad("LEFT_FULL", "A_B_X_Y");
+		
 		super.create();
 	}
 
@@ -200,6 +202,8 @@ class StoryMenuState extends MusicBeatState
 		persistentUpdate = true;
 		changeWeek();
 		super.closeSubState();
+		removeTouchPad();
+		addTouchPad("LEFT_FULL", "A_B_X_Y");
 	}
 
 	override function update(elapsed:Float)
@@ -208,8 +212,8 @@ class StoryMenuState extends MusicBeatState
 		var downP = controls.UI_DOWN_P;
 		var leftP = controls.UI_LEFT_P;
 		var rightP = controls.UI_RIGHT_P;
-		var ctrl = FlxG.keys.justPressed.CONTROL;
-		var mbutt = FlxG.keys.justPressed.M;
+		var ctrl = FlxG.keys.justPressed.CONTROL || touchPad.buttonX.justPressed;
+		var mbutt = FlxG.keys.justPressed.M || touchPad.buttonY.justPressed;
 		if (!selectedWeek)
 		{
 			if (upP)
@@ -232,6 +236,7 @@ class StoryMenuState extends MusicBeatState
 			if(mbutt)
 			{
 				persistentUpdate = false;
+				removeTouchPad();
 				openSubState(new GameplayChangersSubState());
 			}
 			else if(ctrl)
